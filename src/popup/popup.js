@@ -1,11 +1,10 @@
 // Storage keys
 const STORAGE_KEYS = {
-  TODOS: 'todos'
-  // TODO: Add more storage keys as needed
-  // - STREAK: for tracking daily streaks
-  // - BLOCKED_SITES: for website blocker
-  // - TIMER_STATE: for timer persistence
-  // - AVATAR_SETTINGS: for user customization
+  TODOS: 'todos',
+  STREAK: 'streak',
+  BLOCKED_SITES: 'blockedSites',
+  TIMER_STATE: 'timerState',
+  AVATAR_SETTINGS: 'avatarSettings'
 };
 
 // Initialize when DOM is loaded
@@ -16,17 +15,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Setup basic event listeners
 function setupEventListeners() {
-  // Todo list
+
   document.getElementById('addTodo')?.addEventListener('click', addTodo);
   document.getElementById('todoInput')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addTodo();
   });
 
-  // TODO: Add more event listeners
-  // - Timer controls (start, pause, reset)
-  // - Tab navigation
-  // - Settings
-  // - Website blocker
+
+  document.getElementById('startTimer')?.addEventListener('click', startTimer);
+  document.getElementById('pauseTimer')?.addEventListener('click', pauseTimer);
+  document.getElementById('resetTimer')?.addEventListener('click', resetTimer);
+
+  document.querySelectorAll('.tab-button')?.forEach(button => {
+    button.addEventListener('click', (e) => {
+      const tabName = e.target.dataset.tab;
+      switchTab(tabName);
+    });
+  });
+
+  // Settings
+  document.getElementById('saveSettings')?.addEventListener('click', saveSettings);
+
+  // Website blocker
+  document.getElementById('addBlockedSite')?.addEventListener('click', addBlockedSite);
+  document.getElementById('blockedSiteInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addBlockedSite();
+  });
 }
 
 // Todo list functionality
