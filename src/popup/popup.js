@@ -98,7 +98,7 @@ async function addTodo() {
 
   todos.push(newTodo);
   await chrome.storage.local.set({ [STORAGE_KEYS.TODOS]: todos });
-  
+
   input.value = '';
   await loadTodos();
 }
@@ -123,17 +123,78 @@ async function deleteTodo(index) {
   await loadTodos();
 }
 
-// TODO: Timer functionality
-// - Add pomodoro timer with start/pause/reset
-// - Store timer state in chrome.storage
-// - Show notifications when timer completes
-// - Support different timer modes (work, short break, long break)
+// Timer functionality
+let timerInterval = null;
+let timeRemaining = 25 * 60; // 25 minutes in seconds
+let isTimerRunning = false;
 
-// TODO: Streak tracking
-// - Track daily completion streaks (like Snapchat)
-// - Store last visit date
-// - Calculate and display current streak
-// - Add visual indicators for milestones
+function startTimer() {
+  if (isTimerRunning) return;
+
+  isTimerRunning = true;
+
+  timerInterval = setInterval(() => {
+    if (timeRemaining > 0) {
+      timeRemaining--;
+      updateTimerDisplay();
+      saveTimerState();
+    } else {
+      // Timer completed
+      pauseTimer();
+      showNotification('Timer Complete!', 'Your session is finished.');
+    }
+  }, 1000);
+
+  updateTimerDisplay();
+  saveTimerState();
+}
+
+function pauseTimer() {
+  isTimerRunning = false;
+
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  saveTimerState();
+}
+
+function resetTimer() {
+  pauseTimer();
+  timeRemaining = 25 * 60; // Reset to 25 minutes
+  updateTimerDisplay();
+  saveTimerState();
+}
+
+function updateTimerDisplay() {
+  const minutes = Math.floor(timeRemaining / 60);
+  const seconds = timeRemaining % 60;
+  const display = document.getElementById('timerDisplay');
+  if (display) {
+    display.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+}
+
+async function saveTimerState() {
+  await chrome.storage.local.set({
+    [STORAGE_KEYS.TIMER_STATE]: {
+      timeRemaining,
+      isRunning: isTimerRunning
+    }
+  });
+}
+
+// Streak tracking
+async function updateStreak() {
+  // TODO: Implement streak tracking
+  // - Get last visit date from storage
+  // - Compare with today's date
+  // - Increment streak if consecutive days
+  // - Reset streak if gap > 1 day
+  // - Update UI with current streak
+  console.log('Update streak');
+}
 
 // TODO: Website blocker
 // - Allow users to add/remove blocked sites
@@ -165,4 +226,24 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+function showNotification(title, message) {
+  // Check if notifications are supported
+  if ('Notification' in window) {
+    // Request permission if needed
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body: message });
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          new Notification(title, { body: message });
+        }
+      });
+    }
+  }
+  // Fallback to alert if notifications not supported
+  else {
+    alert(`${title}\n${message}`);
+  }
 }
