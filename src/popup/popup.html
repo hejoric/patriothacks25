@@ -135,3 +135,50 @@
         <div id="usageStats" class="usage-list"></div>
       </div>
     </div>
+
+   <!-- Settings Tab -->
+    <div id="settings" class="tab-content">
+      <h3>Customize Avatar</h3>
+      <div class="avatar-customization">
+        <div class="setting-group">
+          <label>Avatar Color:</label>
+          <input type="color" id="avatarColor" value="#4CAF50" />
+        </div>
+        <div class="setting-group">
+          <label>Avatar Style:</label>
+          <select id="avatarStyle">
+            <option value="circle">Circle</option>
+            <option value="square">Square</option>
+            <option value="rounded">Rounded</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label>Avatar Emoji:</label>
+          <select id="avatarEmoji">
+            <option value="😊">😊 Happy</option>
+            <option value="🤓">🤓 Nerdy</option>
+            <option value="🚀">🚀 Rocket</option>
+            <option value="🌟">🌟 Star</option>
+            <option value="💪">💪 Strong</option>
+          </select>
+        </div>
+      </div>
+      
+      <h3>Notifications</h3>
+      <div class="setting-group">
+        <label>
+          <input type="checkbox" id="enableNotifications" checked />
+          Enable task completion notifications
+        </label>
+      </div>
+      
+      <h3>Data Management</h3>
+      <button id="exportData" class="action-btn">Export Data</button>
+      <button id="importData" class="action-btn">Import Data</button>
+      <button id="clearData" class="action-btn danger">Clear All Data</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
