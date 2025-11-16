@@ -26,3 +26,19 @@
       <button class="tab-button" data-tab="blocker">Blocker</button>
       <button class="tab-button" data-tab="settings">Settings</button>
     </div>
+
+  <!-- Todo List Tab -->
+    <div id="todos" class="tab-content active">
+      <div class="todo-header">
+        <input type="text" id="todoInput" placeholder="Add a new task.." />
+        <select id="taskPriority" class="priority-selector">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="urgent">Urgent</option>
+        </select>
+        <label class="daily-task-toggle">
+          <input type="checkbox" id="isDailyTask" />
+          <span>Daily</span>
+        </label>
+        <button id="addTodo">+</button>
+      </div>
