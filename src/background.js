@@ -101,3 +101,24 @@ async function recordTimeSpent() {
   currentTab = null;
   startTime = null;
 }
+
+//Handle messages from popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'UPDATE_BLOCKED_SITES') {
+    updateBlockingRules(message.sites);
+  } else if (message.type === 'SHOW_NOTIFICATION') {
+    showNotification(message.title, message.message);
+  } else if (message.type === 'PLAY_ALARM') {
+    playAlarm(message.voicePack);
+  } else if (message.type === 'START_TIMER') {
+    startTimerAlarm(message.endTime, message.mode);
+  } else if (message.type === 'PAUSE_TIMER') {
+    chrome.alarms.clear('timerComplete');
+  } else if (message.type === 'START_BRAIN_BREAK') {
+    startBrainBreak(message.endTime);
+  } else if (message.type === 'END_BRAIN_BREAK') {
+    endBrainBreak();
+  }
+});
+
+
