@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Site Blocked - Productivity Pal</title>
   <link rel="stylesheet" href="blocked.css">
 </head>
+
 <body>
   <div class="container">
     <div class="icon">🚫</div>
     <h1>Website Blocked</h1>
     <p>This site has been blocked to help you stay focused and productive!</p>
-    
+
     <div class="motivational">
       "Focus is the key to unlocking your potential." 🎯
     </div>
-    
+
     <div class="stats">
       <div class="stat-item">
         <span class="stat-value" id="tasksCompleted">0</span>
@@ -26,35 +28,14 @@
         <span class="stat-label">Day Streak 🔥</span>
       </div>
     </div>
-    
+
     <div class="action-buttons">
       <button class="btn btn-primary" onclick="openExtension()">Open Productivity Pal</button>
       <button class="btn btn-secondary" onclick="history.back()">Go Back</button>
     </div>
   </div>
-  
-  <script>
-    // Load and display stats
-    async function loadStats() {
-      const data = await chrome.storage.local.get(['todos', 'streak']);
-      const todos = data.todos || [];
-      const streak = data.streak || 0;
-      
-      const today = new Date().toDateString();
-      const todayTodos = todos.filter(todo => 
-        new Date(todo.createdAt).toDateString() === today
-      );
-      const completed = todayTodos.filter(todo => todo.completed).length;
-      
-      document.getElementById('tasksCompleted').textContent = completed;
-      document.getElementById('streak').textContent = streak;
-    }
-    
-    function openExtension() {
-      chrome.runtime.sendMessage({ type: 'OPEN_POPUP' });
-    }
-    
-    loadStats();
-  </script>
+
+  <script src="blocked.js"></script>
 </body>
+
 </html>
