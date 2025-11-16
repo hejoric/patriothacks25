@@ -118,6 +118,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     startBrainBreak(message.endTime);
   } else if (message.type === 'END_BRAIN_BREAK') {
     endBrainBreak();
+  } else if (message.type === 'OPEN_POPUP') {
+    chrome.action.openPopup();
   }
 });
 
@@ -154,7 +156,7 @@ async function updateBlockingRules(sites) {
     action: {
       type: 'redirect',
       redirect: {
-        url: chrome.runtime.getURL('blocked.html')
+        url: chrome.runtime.getURL('assets/blocked.html')
       }
     },
     condition: {
@@ -174,7 +176,7 @@ async function updateBlockingRules(sites) {
 function showNotification(title, message) {
   chrome.notifications.create({
     type: 'basic',
-    iconUrl: 'icons/icon128.png',
+    iconUrl: 'assets/icons/icon128.png',
     title: title,
     message: message,
     priority: 2

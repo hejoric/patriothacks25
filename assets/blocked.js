@@ -18,4 +18,8 @@ function openExtension() {
     chrome.runtime.sendMessage({ type: 'OPEN_POPUP' });
 }
 
+// Add event listeners
+document.getElementById('openExtensionBtn').addEventListener('click', openExtension);
+document.getElementById('goBackBtn').addEventListener('click', () => history.back());
+
 loadStats();

@@ -5,118 +5,144 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Productivity Pal</title>
-  <link rel="stylesheet" href="../../assets/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../assets/custom.css">
 </head>
 
 <body>
-  <div class="container">
+  <div class="container p-2" style="height: 100%; display: flex; flex-direction: column;">
     <!-- Avatar and Mood Meter -->
-    <div class="avatar-section">
-      <div class="avatar-container">
+    <div class="text-center mb-2 bg-white rounded-3 p-2 shadow-sm">
+      <div class="position-relative d-inline-block">
         <div id="avatar" class="avatar"></div>
         <div id="moodMeter" class="mood-meter">😊</div>
       </div>
-      <div class="streak-counter">
+      <div class="fs-6 fw-bold text-primary mt-1">
         🔥 <span id="streakCount">0</span> day streak
       </div>
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="tabs">
-      <button class="tab-button active" data-tab="todos">Tasks</button>
-      <button class="tab-button" data-tab="timer">Timer</button>
-      <button class="tab-button" data-tab="blocker">Blocker</button>
-      <button class="tab-button" data-tab="settings">Settings</button>
-    </div>
+    <ul class="nav nav-pills mb-2 bg-white rounded-3 p-1 shadow-sm" role="tablist">
+      <li class="nav-item flex-fill">
+        <button class="nav-link active w-100 tab-button py-1 px-2 small" data-tab="todos" title="Tasks">✓</button>
+      </li>
+      <li class="nav-item flex-fill">
+        <button class="nav-link w-100 tab-button py-1 px-2 small" data-tab="timer" title="Timer">⏱</button>
+      </li>
+      <li class="nav-item flex-fill">
+        <button class="nav-link w-100 tab-button py-1 px-2 small" data-tab="blocker" title="Blocker">🚫</button>
+      </li>
+      <li class="nav-item flex-fill">
+        <button class="nav-link w-100 tab-button py-1 px-2 small" data-tab="settings" title="Settings">⚙</button>
+      </li>
+    </ul>
 
     <!-- Todo List Tab -->
-    <div id="todos" class="tab-content active">
-      <div class="todo-header">
-        <input type="text" id="todoInput" placeholder="Add a new task.." />
-        <select id="taskPriority" class="priority-selector">
-          <option value="low">Low</option>
-          <option value="medium" selected>Medium</option>
-          <option value="urgent">Urgent</option>
-        </select>
-        <label class="daily-task-toggle">
-          <input type="checkbox" id="isDailyTask" />
-          <span>Daily</span>
-        </label>
-        <button id="addTodo">+</button>
+    <div id="todos" class="tab-content active bg-white rounded-3 p-2 shadow-sm" style="display: block; flex: 1;">
+      <div class="mb-2">
+        <div class="input-group mb-2">
+          <input type="text" id="todoInput" class="form-control form-control-sm" placeholder="Add a new task.." />
+          <button id="addTodo" class="btn btn-success btn-sm px-3">Add</button>
+        </div>
+        <div class="d-flex gap-2">
+          <select id="taskPriority" class="form-select form-select-sm" style="flex: 1;">
+            <option value="low">Low Priority</option>
+            <option value="medium" selected>Medium Priority</option>
+            <option value="urgent">Urgent Priority</option>
+          </select>
+          <button type="button" id="dailyTaskBtn"
+            class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2"
+            style="white-space: nowrap; min-width: 120px;">
+            <input type="checkbox" id="isDailyTask" class="form-check-input m-0" />
+            <span>Daily Task</span>
+          </button>
+        </div>
       </div>
 
       <!-- Progress Bar -->
-      <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
-        <div class="progress-text" id="progressText">0%</div>
+      <div class="progress mb-3" style="height: 30px;">
+        <div class="progress-bar bg-success" id="progressBar" role="progressbar" style="width: 0%"></div>
+        <span class="position-absolute w-100 text-center fw-bold" style="line-height: 30px;" id="progressText">0%</span>
       </div>
 
       <!-- Daily Tasks Section -->
-      <div class="task-section">
-        <div class="section-header" data-section="daily">
-          <span class="expand-icon">▼</span>
-          <h4>Daily Tasks</h4>
-          <span class="task-count" id="dailyCount">0</span>
+      <div class="card mb-3 task-section">
+        <div class="card-header bg-light section-header" data-section="daily" style="cursor: pointer;">
+          <div class="d-flex align-items-center">
+            <span class="expand-icon me-2">▼</span>
+            <h6 class="mb-0 flex-grow-1 text-primary">Daily Tasks</h6>
+            <span class="badge bg-primary task-count" id="dailyCount">0</span>
+          </div>
         </div>
-        <div id="dailyTasksList" class="todo-list section-content"></div>
+        <div id="dailyTasksList" class="card-body section-content todo-list"></div>
       </div>
 
       <!-- Regular Tasks Section -->
-      <div class="task-section">
-        <div class="section-header" data-section="regular">
-          <span class="expand-icon">▼</span>
-          <h4>Tasks</h4>
-          <span class="task-count" id="regularCount">0</span>
+      <div class="card mb-3 task-section">
+        <div class="card-header bg-light section-header" data-section="regular" style="cursor: pointer;">
+          <div class="d-flex align-items-center">
+            <span class="expand-icon me-2">▼</span>
+            <h6 class="mb-0 flex-grow-1 text-primary">Tasks</h6>
+            <span class="badge bg-primary task-count" id="regularCount">0</span>
+          </div>
         </div>
-        <div id="todoList" class="todo-list section-content"></div>
+        <div id="todoList" class="card-body section-content todo-list">
+        </div>
       </div>
 
       <!-- Completed Tasks Section -->
-      <div class="task-section">
-        <div class="section-header" data-section="completed">
-          <span class="expand-icon">▼</span>
-          <h4>Completed</h4>
-          <span class="task-count" id="completedCount">0</span>
+      <div class="card mb-3 task-section">
+        <div class="card-header bg-light section-header" data-section="completed" style="cursor: pointer;">
+          <div class="d-flex align-items-center">
+            <span class="expand-icon me-2">▼</span>
+            <h6 class="mb-0 flex-grow-1 text-primary">Completed</h6>
+            <span class="badge bg-primary task-count" id="completedCount">0</span>
+          </div>
         </div>
-        <div id="completedList" class="todo-list section-content"></div>
+        <div id="completedList" class="card-body section-content todo-list"></div>
       </div>
 
-      <div class="productivity-stats">
-        <div>Today: <span id="todayCompleted">0</span>/<span id="todayTotal">0</span></div>
+      <div class="text-center fw-bold text-primary border-top pt-3">
+        Today: <span id="todayCompleted">0</span>/<span id="todayTotal">0</span>
       </div>
     </div>
 
     <!-- Timer Tab -->
-    <div id="timer" class="tab-content">
-      <div class="timer-mode-selector">
-        <button class="mode-btn active" data-mode="pomodoro" data-minutes="25">Pomodoro</button>
-        <button class="mode-btn" data-mode="shortBreak" data-minutes="5">Short Break</button>
-        <button class="mode-btn" data-mode="longBreak" data-minutes="15">Long Break</button>
+    <div id="timer" class="tab-content bg-white rounded-3 p-3 shadow-sm" style="min-height: 300px; display: none;">
+      <div class="btn-group w-100 mb-3" role="group">
+        <button class="btn btn-outline-primary mode-btn active" data-mode="pomodoro" data-minutes="25">Pomodoro</button>
+        <button class="btn btn-outline-primary mode-btn" data-mode="shortBreak" data-minutes="5">Short Break</button>
+        <button class="btn btn-outline-primary mode-btn" data-mode="longBreak" data-minutes="15">Long Break</button>
       </div>
 
-      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div id="timerDisplay" class="timer-display">25:00</div>
 
-      <div class="timer-controls">
-        <button id="startTimer" class="timer-btn primary">Start</button>
-        <button id="pauseTimer" class="timer-btn">Pause</button>
-        <button id="resetTimer" class="timer-btn">Reset</button>
+      <div class="d-flex gap-2 justify-content-center mb-4">
+        <button id="startTimer" class="btn btn-primary px-4">Start</button>
+        <button id="pauseTimer" class="btn btn-secondary">Pause</button>
+        <button id="resetTimer" class="btn btn-secondary">Reset</button>
       </div>
 
       <!-- Brain Break Section -->
-      <div class="brain-break-section">
-        <h4>🧠 Brain Break</h4>
-        <p class="brain-break-description">Take a quick break! , you will have access to blocked sites</p>
-        <div class="brain-break-controls">
-          <button class="brain-break-btn" data-minutes="5">5 min</button>
-          <button class="brain-break-btn" data-minutes="10">10 min</button>
-          <button class="brain-break-btn" data-minutes="15">15 min</button>
+      <div class="card bg-light border-primary mb-3">
+        <div class="card-body">
+          <h6 class="card-title text-primary">🧠 Brain Break</h6>
+          <p class="card-text small text-muted">Take a quick break! You will have access to blocked sites</p>
+          <div class="btn-group w-100 mb-2" role="group">
+            <button class="btn btn-outline-primary btn-sm brain-break-btn" data-minutes="5">5 min</button>
+            <button class="btn btn-outline-primary btn-sm brain-break-btn" data-minutes="10">10 min</button>
+            <button class="btn btn-outline-primary btn-sm brain-break-btn" data-minutes="15">15 min</button>
+          </div>
+          <button id="endBrainBreak" class="btn btn-warning btn-sm w-100 mb-2" style="display: none;">End Break
+            Early</button>
+          <div id="brainBreakStatus" class="brain-break-status text-center fw-bold"></div>
         </div>
-        <div id="brainBreakStatus" class="brain-break-status"></div>
       </div>
 
-      <div class="voice-pack-selector">
-        <label>Alarm Voice:</label>
-        <select id="voicePack">
+      <div class="d-flex align-items-center gap-2">
+        <label class="fw-medium">Alarm Voice:</label>
+        <select id="voicePack" class="form-select form-select-sm">
           <option value="beep">Beep</option>
           <option value="chime">Chime</option>
           <option value="bell">Bell</option>
@@ -126,58 +152,59 @@
     </div>
 
     <!-- Website Blocker Tab -->
-    <div id="blocker" class="tab-content">
-      <div class="blocker-header">
-        <input type="text" id="blockedSiteInput" placeholder="Enter website to block..." />
-        <button id="addBlockedSite">Block</button>
+    <div id="blocker" class="tab-content bg-white rounded-3 p-3 shadow-sm" style="display: none;">
+      <div class="d-flex gap-2 mb-3">
+        <input type="text" id="blockedSiteInput" class="form-control" placeholder="Enter website to block..." />
+        <button id="addBlockedSite" class="btn btn-danger">Block</button>
       </div>
-      <div id="blockedSitesList" class="blocked-sites-list"></div>
-      <div class="usage-stats">
-        <h3>Time Spent on Distracting Sites Today:</h3>
-        <div id="usageStats" class="usage-list"></div>
+      <div id="blockedSitesList" class="mb-3"></div>
+      <div>
+        <h6 class="text-muted mb-2">Time Spent on Distracting Sites Today:</h6>
+        <div id="usageStats"></div>
       </div>
     </div>
 
     <!-- Settings Tab -->
-    <div id="settings" class="tab-content">
-      <h3>Customize Avatar</h3>
-      <div class="avatar-customization">
-        <div class="setting-group">
-          <label>Avatar Color:</label>
-          <input type="color" id="avatarColor" value="#4CAF50" />
-        </div>
-        <div class="setting-group">
-          <label>Avatar Style:</label>
-          <select id="avatarStyle">
-            <option value="circle">Circle</option>
-            <option value="square">Square</option>
-            <option value="rounded">Rounded</option>
-          </select>
-        </div>
-        <div class="setting-group">
-          <label>Avatar Emoji:</label>
-          <select id="avatarEmoji">
-            <option value="😊">😊 Happy</option>
-            <option value="🤓">🤓 Nerdy</option>
-            <option value="🚀">🚀 Rocket</option>
-            <option value="🌟">🌟 Star</option>
-            <option value="💪">💪 Strong</option>
-          </select>
-        </div>
+    <div id="settings" class="tab-content bg-white rounded-3 p-3 shadow-sm" style="min-height: 300px; display: none;">
+      <h6 class="text-primary mb-3">Customize Avatar</h6>
+
+      <div class="mb-3">
+        <label class="form-label">Avatar Color:</label>
+        <input type="color" id="avatarColor" class="form-control form-control-color" value="#4CAF50" />
       </div>
 
-      <h3>Notifications</h3>
-      <div class="setting-group">
-        <label>
-          <input type="checkbox" id="enableNotifications" checked />
+      <div class="mb-3">
+        <label class="form-label">Avatar Style:</label>
+        <select id="avatarStyle" class="form-select">
+          <option value="circle">Circle</option>
+          <option value="square">Square</option>
+          <option value="rounded">Rounded</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Avatar Emoji:</label>
+        <select id="avatarEmoji" class="form-select">
+          <option value="😊">😊 Happy</option>
+          <option value="🤓">🤓 Nerdy</option>
+          <option value="🚀">🚀 Rocket</option>
+          <option value="🌟">🌟 Star</option>
+          <option value="💪">💪 Strong</option>
+        </select>
+      </div>
+
+      <h6 class="text-primary mb-3">Notifications</h6>
+      <div class="form-check mb-4">
+        <input type="checkbox" id="enableNotifications" class="form-check-input" checked />
+        <label class="form-check-label" for="enableNotifications">
           Enable task completion notifications
         </label>
       </div>
 
-      <h3>Data Management</h3>
-      <button id="exportData" class="action-btn">Export Data</button>
-      <button id="importData" class="action-btn">Import Data</button>
-      <button id="clearData" class="action-btn danger">Clear All Data</button>
+      <h6 class="text-primary mb-3">Data Management</h6>
+      <button id="exportData" class="btn btn-primary w-100 mb-2">Export Data</button>
+      <button id="importData" class="btn btn-primary w-100 mb-2">Import Data</button>
+      <button id="clearData" class="btn btn-danger w-100">Clear All Data</button>
     </div>
   </div>
 

@@ -1,0 +1,212 @@
+/* Custom styles - Nyan Cat Neon Theme */
+
+body {
+    width: 400px;
+    height: 600px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ff0080 0%, #ff8c00 20%, #40e0d0 40%, #9370db 60%, #ff1493 80%, #00bfff 100%);
+    animation: rainbowShift 3s ease-in-out infinite alternate;
+}
+
+@keyframes rainbowShift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(20deg); }
+}
+
+.container {
+    max-width: 100%;
+    padding: 0;
+}
+
+/* Avatar customization - Nyan Cat style */
+.avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #ff6ec7, #ffd93d, #6bffb8, #a78fff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin: 0 auto 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(255, 110, 199, 0.6), 0 0 40px rgba(167, 143, 255, 0.4);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.avatar.square {
+    border-radius: 15px;
+}
+
+.avatar.rounded {
+    border-radius: 20px;
+}
+
+.mood-meter {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #ff0080, #ff8c00);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(255, 0, 128, 0.8);
+}
+
+/* Tab styling - Neon glow effect */
+.tab-button {
+    font-size: 20px;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    transform: scale(1.1);
+    text-shadow: 0 0 10px currentColor;
+}
+
+.tab-button.active {
+    background: linear-gradient(135deg, #ff0080, #ff8c00, #40e0d0) !important;
+    color: white !important;
+    box-shadow: 0 0 15px rgba(255, 0, 128, 0.8), 0 0 30px rgba(64, 224, 208, 0.5);
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(255, 0, 128, 0.8), 0 0 30px rgba(64, 224, 208, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(255, 0, 128, 1), 0 0 50px rgba(64, 224, 208, 0.8); }
+}
+
+/* Timer display - Neon style */
+.timer-display {
+    font-size: 56px;
+    font-weight: bold;
+    text-align: center;
+    margin: 30px 0;
+    color: #ff6ec7;
+    font-family: 'Courier New', monospace;
+    text-shadow: 
+        0 0 10px #ff6ec7,
+        0 0 20px #ff6ec7,
+        0 0 30px #ff0080,
+        0 0 40px #ff0080;
+    animation: timerGlow 2s ease-in-out infinite;
+}
+
+@keyframes timerGlow {
+    0%, 100% { 
+        text-shadow: 
+            0 0 10px #ff6ec7,
+            0 0 20px #ff6ec7,
+            0 0 30px #ff0080,
+            0 0 40px #ff0080;
+    }
+    50% { 
+        text-shadow: 
+            0 0 20px #ff6ec7,
+            0 0 30px #ff6ec7,
+            0 0 40px #ff0080,
+            0 0 60px #ff0080;
+    }
+}
+
+/* Priority borders - Rainbow neon colors */
+.todo-item {
+    border-left: 30px solid transparent;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.todo-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(255, 0, 128, 0.3);
+}
+
+.todo-item.completed {
+    opacity: 0.7;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #999;
+}
+
+.todo-item.priority-low {
+    border-left-color: #6bffb8;
+    background: rgba(107, 255, 184, 0.1);
+    box-shadow: -5px 0 15px rgba(107, 255, 184, 0.3);
+}
+
+.todo-item.priority-medium {
+    border-left-color: #ffd93d;
+    background: rgba(255, 217, 61, 0.1);
+    box-shadow: -5px 0 15px rgba(255, 217, 61, 0.3);
+}
+
+.todo-item.priority-urgent {
+    border-left-color: #ff6ec7;
+    background: rgba(255, 110, 199, 0.1);
+    box-shadow: -5px 0 15px rgba(255, 110, 199, 0.3);
+    animation: urgentGlow 2s ease-in-out infinite;
+}
+
+@keyframes urgentGlow {
+    0%, 100% { box-shadow: -5px 0 15px rgba(255, 110, 199, 0.3); }
+    50% { box-shadow: -5px 0 25px rgba(255, 110, 199, 0.6); }
+}
+
+/* Expand icon animation */
+.expand-icon {
+    transition: transform 0.3s ease;
+}
+
+.task-section.collapsed .expand-icon {
+    transform: rotate(-90deg);
+}
+
+.task-section.collapsed .section-content {
+    display: none;
+}
+
+/* Tab content display */
+.tab-content {
+    display: none;
+    overflow-y: auto;
+}
+
+.tab-content.active {
+    display: flex !important;
+    flex-direction: column;
+}
+
+/* Brain break pulse animation */
+.brain-break-status.active {
+    color: #4CAF50;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}

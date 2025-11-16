@@ -41,7 +41,7 @@ async function initializeExtension() {
 function setupEventListeners() {
   document.querySelectorAll('.tab-button').forEach(button => {
     button.addEventListener('click', (e) => {
-      const tabName = e.target.dataset.tab;
+      const tabName = e.currentTarget.dataset.tab;
       switchTab(tabName);
     });
   });
@@ -49,6 +49,14 @@ function setupEventListeners() {
   document.getElementById('addTodo').addEventListener('click', addTodo);
   document.getElementById('todoInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addTodo();
+  });
+
+  // Daily task button toggle
+  document.getElementById('dailyTaskBtn').addEventListener('click', (e) => {
+    if (e.target.tagName !== 'INPUT') {
+      const checkbox = document.getElementById('isDailyTask');
+      checkbox.checked = !checkbox.checked;
+    }
   });
 
   document.querySelectorAll('.section-header').forEach(header => {
@@ -74,6 +82,10 @@ function setupEventListeners() {
       const minutes = parseInt(e.currentTarget.dataset.minutes, 10);
       startBrainBreak(minutes);
     });
+  });
+
+  document.getElementById('endBrainBreak').addEventListener('click', () => {
+    endBrainBreak();
   });
 
   document.getElementById('voicePack').addEventListener('change', (e) => {
@@ -108,15 +120,26 @@ function setupEventListeners() {
 
 // Tab switching
 function switchTab(tabName) {
+  // Remove active from all buttons and add Bootstrap's active class
   document.querySelectorAll('.tab-button').forEach(btn => {
     btn.classList.remove('active');
   });
+  
+  // Hide all tab content
   document.querySelectorAll('.tab-content').forEach(content => {
     content.classList.remove('active');
+    content.style.display = 'none';
   });
 
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-  document.getElementById(tabName).classList.add('active');
+  // Show selected tab
+  const selectedButton = document.querySelector(`[data-tab="${tabName}"]`);
+  const selectedContent = document.getElementById(tabName);
+  
+  if (selectedButton) selectedButton.classList.add('active');
+  if (selectedContent) {
+    selectedContent.classList.add('active');
+    selectedContent.style.display = 'block';
+  }
 }
 
 // Streak management (Snapchat-style)
@@ -247,22 +270,29 @@ async function loadDailyTasks() {
 
 function createTodoElement(todo, index, isCompleted = false) {
   const div = document.createElement('div');
-  div.className = `todo-item ${todo.completed ? 'completed' : ''} priority-${todo.priority || 'medium'}`;
+  div.className = `todo-item d-flex align-items-center gap-2 ${todo.completed ? 'completed' : ''} priority-${todo.priority || 'medium'}`;
 
-  const badgeHtml = todo.isDaily ? '<span class="todo-badge">DAILY</span>' : '';
+  const badgeHtml = todo.isDaily ? '<span class="badge bg-info text-dark">DAILY</span>' : '';
+  const completeBtn = todo.completed 
+    ? '<button class="btn btn-sm btn-outline-secondary" data-index="' + index + '" data-action="uncomplete">Undo</button>'
+    : '<button class="btn btn-sm btn-success" data-index="' + index + '" data-action="complete">Complete</button>';
 
   div.innerHTML = `
-    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} data-index="${index}">
-    <span class="todo-text">${escapeHtml(todo.text)}</span>
+    <span class="todo-text flex-grow-1">${escapeHtml(todo.text)}</span>
     ${badgeHtml}
-    <button class="todo-delete" data-index="${index}">Delete</button>
+    ${completeBtn}
+    <button class="btn btn-sm btn-danger" data-index="${index}" data-action="delete">Delete</button>
   `;
 
-  div.querySelector('.todo-checkbox').addEventListener('change', (e) => {
-    toggleTodo(parseInt(e.target.dataset.index));
-  });
+  const completeButton = div.querySelector('[data-action="complete"], [data-action="uncomplete"]');
+  if (completeButton) {
+    completeButton.addEventListener('click', (e) => {
+      toggleTodo(parseInt(e.target.dataset.index));
+    });
+  }
 
-  div.querySelector('.todo-delete').addEventListener('click', (e) => {
+  const deleteButton = div.querySelector('[data-action="delete"]');
+  deleteButton.addEventListener('click', (e) => {
     deleteTodo(parseInt(e.target.dataset.index));
   });
 
@@ -374,7 +404,8 @@ function updateTodoStats(todos) {
 
 // Section collapse/expand
 async function toggleSection(sectionName) {
-  const section = document.querySelector(`[data-section="${sectionName}"]`).parentElement;
+  const header = document.querySelector(`[data-section="${sectionName}"]`);
+  const section = header.closest('.task-section');
   section.classList.toggle('collapsed');
 
   const data = await chrome.storage.local.get(STORAGE_KEYS.SECTION_COLLAPSED);
@@ -389,8 +420,11 @@ async function loadSectionStates() {
 
   Object.keys(collapsed).forEach(sectionName => {
     if (collapsed[sectionName]) {
-      const section = document.querySelector(`[data-section="${sectionName}"]`).parentElement;
-      section.classList.add('collapsed');
+      const header = document.querySelector(`[data-section="${sectionName}"]`);
+      if (header) {
+        const section = header.closest('.task-section');
+        section.classList.add('collapsed');
+      }
     }
   });
 }
@@ -409,13 +443,25 @@ const TIMER_MODES = {
 };
 
 async function setTimerMode(mode, minutes) {
+  // Reset timer when switching modes
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  
+  isTimerRunning = false;
+  timerEndTime = null;
   currentMode = mode;
-  pauseTimer();
   timeRemaining = minutes * 60;
+  
   updateTimerDisplay();
 
+  // Update button states
   document.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.mode === mode);
+    btn.classList.remove('active');
+    if (btn.dataset.mode === mode) {
+      btn.classList.add('active');
+    }
   });
 
   await saveTimerState();
@@ -578,6 +624,7 @@ function runBrainBreakTimer() {
 async function checkBrainBreak() {
   const data = await chrome.storage.local.get(STORAGE_KEYS.BRAIN_BREAK);
   const brainBreak = data[STORAGE_KEYS.BRAIN_BREAK];
+  const endBreakBtn = document.getElementById('endBrainBreak');
 
   if (brainBreak && brainBreak.active) {
     const remaining = Math.max(0, Math.floor((brainBreak.endTime - Date.now()) / 1000));
@@ -588,12 +635,14 @@ async function checkBrainBreak() {
       document.getElementById('brainBreakStatus').textContent =
         `Break active: ${minutes}:${String(seconds).padStart(2, '0')} remaining`;
       document.getElementById('brainBreakStatus').className = 'brain-break-status active';
+      if (endBreakBtn) endBreakBtn.style.display = 'block';
     } else {
       await endBrainBreak();
     }
   } else {
     document.getElementById('brainBreakStatus').textContent = '';
     document.getElementById('brainBreakStatus').className = 'brain-break-status';
+    if (endBreakBtn) endBreakBtn.style.display = 'none';
   }
 }
 
@@ -637,14 +686,17 @@ async function loadBlockedSites() {
 
 function createBlockedSiteElement(site, index) {
   const div = document.createElement('div');
-  div.className = 'blocked-site-item';
+  div.className = 'd-flex align-items-center justify-content-between p-2 mb-2 bg-light rounded border';
 
   div.innerHTML = `
-    <span class="site-url">${escapeHtml(site)}</span>
-    <button class="unblock-btn" data-index="${index}">Unblock</button>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-danger">🚫</span>
+      <span class="fw-medium">${escapeHtml(site)}</span>
+    </div>
+    <button class="btn btn-sm btn-success" data-index="${index}">Unblock</button>
   `;
 
-  div.querySelector('.unblock-btn').addEventListener('click', (e) => {
+  div.querySelector('button').addEventListener('click', (e) => {
     unblockSite(parseInt(e.target.dataset.index));
   });
 
@@ -698,17 +750,26 @@ async function loadUsageStats() {
   const sites = Object.entries(todayUsage).sort((a, b) => b[1] - a[1]);
 
   if (sites.length === 0) {
-    usageList.innerHTML = '<div class="usage-item">No usage data yet today</div>';
+    usageList.innerHTML = '<div class="text-center text-muted py-3"><em>No usage data yet today</em></div>';
     return;
   }
 
-  sites.forEach(([site, seconds]) => {
+  const maxSeconds = Math.max(...sites.map(s => s[1]));
+
+  sites.slice(0, 10).forEach(([site, seconds]) => {
     const minutes = Math.floor(seconds / 60);
+    const percentage = maxSeconds > 0 ? (seconds / maxSeconds) * 100 : 0;
+    
     const item = document.createElement('div');
-    item.className = 'usage-item';
+    item.className = 'mb-3';
     item.innerHTML = `
-      <span class="usage-site">${escapeHtml(site)}</span>
-      <span class="usage-time">${minutes}m ${seconds % 60}s</span>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="fw-medium small">${escapeHtml(site)}</span>
+        <span class="badge bg-secondary">${minutes}m ${seconds % 60}s</span>
+      </div>
+      <div class="progress" style="height: 8px;">
+        <div class="progress-bar bg-warning" role="progressbar" style="width: ${percentage}%"></div>
+      </div>
     `;
     usageList.appendChild(item);
   });
