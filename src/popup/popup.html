@@ -42,9 +42,44 @@
         </label>
         <button id="addTodo">+</button>
       </div>
-      
+
  <!-- Progress Bar -->
       <div class="progress-container">
         <div class="progress-bar" id="progressBar"></div>
         <div class="progress-text" id="progressText">0%</div>
       </div>
+
+  <!-- Daily Tasks Section -->
+      <div class="task-section">
+        <div class="section-header" data-section="daily">
+          <span class="expand-icon">▼</span>
+          <h4>Daily Tasks</h4>
+          <span class="task-count" id="dailyCount">0</span>
+        </div>
+        <div id="dailyTasksList" class="todo-list section-content"></div>
+      </div>
+
+  <!-- Regular Tasks Section -->
+      <div class="task-section">
+        <div class="section-header" data-section="regular">
+          <span class="expand-icon">▼</span>
+          <h4>Tasks</h4>
+          <span class="task-count" id="regularCount">0</span>
+        </div>
+        <div id="todoList" class="todo-list section-content"></div>
+      </div>
+
+    <!-- Completed Tasks Section -->
+      <div class="task-section">
+        <div class="section-header" data-section="completed">
+          <span class="expand-icon">▼</span>
+          <h4>Completed</h4>
+          <span class="task-count" id="completedCount">0</span>
+        </div>
+        <div id="completedList" class="todo-list section-content"></div>
+      </div>
+      
+      <div class="productivity-stats">
+        <div>Today: <span id="todayCompleted">0</span>/<span id="todayTotal">0</span></div>
+      </div>
+    </div>
