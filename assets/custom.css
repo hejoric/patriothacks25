@@ -1,4 +1,4 @@
-/* Custom styles - Nyan Cat Neon Theme */
+/* Custom styles */
 
 body {
     width: 400px;
@@ -6,13 +6,7 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: linear-gradient(135deg, #ff0080 0%, #ff8c00 20%, #40e0d0 40%, #9370db 60%, #ff1493 80%, #00bfff 100%);
-    animation: rainbowShift 3s ease-in-out infinite alternate;
-}
-
-@keyframes rainbowShift {
-    0% { filter: hue-rotate(0deg); }
-    100% { filter: hue-rotate(20deg); }
+    background: #f5f5f5;
 }
 
 .container {
@@ -20,11 +14,11 @@ body {
     padding: 0;
 }
 
-/* Avatar customization - Nyan Cat style */
+/* Avatar customization */
 .avatar {
     width: 60px;
     height: 60px;
-    background: linear-gradient(45deg, #ff6ec7, #ffd93d, #6bffb8, #a78fff);
+    background: #0d6efd;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -32,13 +26,7 @@ body {
     font-size: 30px;
     margin: 0 auto 10px;
     transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(255, 110, 199, 0.6), 0 0 40px rgba(167, 143, 255, 0.4);
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .avatar.square {
@@ -54,86 +42,55 @@ body {
     bottom: -5px;
     right: -5px;
     font-size: 18px;
-    background: linear-gradient(135deg, #ff0080, #ff8c00);
+    background: white;
     border-radius: 50%;
     width: 28px;
     height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #fff;
-    box-shadow: 0 0 10px rgba(255, 0, 128, 0.8);
+    border: 2px solid #0d6efd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Tab styling - Neon glow effect */
+/* Tab styling */
 .tab-button {
     font-size: 20px;
     line-height: 1;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .tab-button:hover {
-    transform: scale(1.1);
-    text-shadow: 0 0 10px currentColor;
+    background: #f0f0f0;
 }
 
 .tab-button.active {
-    background: linear-gradient(135deg, #ff0080, #ff8c00, #40e0d0) !important;
+    background: #0d6efd !important;
     color: white !important;
-    box-shadow: 0 0 15px rgba(255, 0, 128, 0.8), 0 0 30px rgba(64, 224, 208, 0.5);
-    animation: neonPulse 2s ease-in-out infinite;
 }
 
-@keyframes neonPulse {
-    0%, 100% { box-shadow: 0 0 15px rgba(255, 0, 128, 0.8), 0 0 30px rgba(64, 224, 208, 0.5); }
-    50% { box-shadow: 0 0 25px rgba(255, 0, 128, 1), 0 0 50px rgba(64, 224, 208, 0.8); }
-}
-
-/* Timer display - Neon style */
+/* Timer display */
 .timer-display {
     font-size: 56px;
     font-weight: bold;
     text-align: center;
     margin: 30px 0;
-    color: #ff6ec7;
+    color: #333;
     font-family: 'Courier New', monospace;
-    text-shadow: 
-        0 0 10px #ff6ec7,
-        0 0 20px #ff6ec7,
-        0 0 30px #ff0080,
-        0 0 40px #ff0080;
-    animation: timerGlow 2s ease-in-out infinite;
 }
 
-@keyframes timerGlow {
-    0%, 100% { 
-        text-shadow: 
-            0 0 10px #ff6ec7,
-            0 0 20px #ff6ec7,
-            0 0 30px #ff0080,
-            0 0 40px #ff0080;
-    }
-    50% { 
-        text-shadow: 
-            0 0 20px #ff6ec7,
-            0 0 30px #ff6ec7,
-            0 0 40px #ff0080,
-            0 0 60px #ff0080;
-    }
-}
-
-/* Priority borders - Rainbow neon colors */
+/* Priority borders */
 .todo-item {
-    border-left: 30px solid transparent;
+    border-left: 4px solid transparent;
     padding: 12px;
     margin-bottom: 10px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    background: white;
 }
 
 .todo-item:hover {
-    transform: translateX(5px);
-    box-shadow: 0 0 15px rgba(255, 0, 128, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .todo-item.completed {
@@ -146,27 +103,15 @@ body {
 }
 
 .todo-item.priority-low {
-    border-left-color: #6bffb8;
-    background: rgba(107, 255, 184, 0.1);
-    box-shadow: -5px 0 15px rgba(107, 255, 184, 0.3);
+    border-left-color: #28a745;
 }
 
 .todo-item.priority-medium {
-    border-left-color: #ffd93d;
-    background: rgba(255, 217, 61, 0.1);
-    box-shadow: -5px 0 15px rgba(255, 217, 61, 0.3);
+    border-left-color: #ffc107;
 }
 
 .todo-item.priority-urgent {
-    border-left-color: #ff6ec7;
-    background: rgba(255, 110, 199, 0.1);
-    box-shadow: -5px 0 15px rgba(255, 110, 199, 0.3);
-    animation: urgentGlow 2s ease-in-out infinite;
-}
-
-@keyframes urgentGlow {
-    0%, 100% { box-shadow: -5px 0 15px rgba(255, 110, 199, 0.3); }
-    50% { box-shadow: -5px 0 25px rgba(255, 110, 199, 0.6); }
+    border-left-color: #dc3545;
 }
 
 /* Expand icon animation */
