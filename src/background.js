@@ -2,10 +2,10 @@
 
 //Storage keys
 const STORAGE_KEYS = {
-    SITE_USAGE: 'siteUsage',
-    BLOCKED_SITES: 'blockedSites',
-    TIMER_STATE: 'timerState'
-    BRAIN_BREAK: 'brainBreak'
+  SITE_USAGE: 'siteUsage',
+  BLOCKED_SITES: 'blockedSites',
+  TIMER_STATE: 'timerState',
+  BRAIN_BREAK: 'brainBreak'
 }
 
 //Tracks active tab and the time spent
@@ -14,17 +14,17 @@ let startTime = null;
 
 //Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
-    console.log('Lock In Extension installed');
-    //set up the intial rules
-    updateBlockingRules();
-    //set up alarms for daily reset
-    chrome.alarms.create('dailyReset', { periodInMinutes: 1440 }); // 24 hours
+  console.log('Lock In Extension installed');
+  //set up the intial rules
+  updateBlockingRules();
+  //set up alarms for daily reset
+  chrome.alarms.create('dailyReset', { periodInMinutes: 1440 }); // 24 hours
 });
 
 // Listen for tab activation
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   await recordTimeSpent();
-  
+
   const tab = await chrome.tabs.get(activeInfo.tabId);
   startTracking(tab);
 });
@@ -76,28 +76,28 @@ function startTracking(tab) {
 // Record time spent on current tab
 async function recordTimeSpent() {
   if (!currentTab || !startTime) return;
-  
+
   const endTime = Date.now();
   const timeSpent = Math.floor((endTime - startTime) / 1000); // in seconds
-  
+
   if (timeSpent > 0 && timeSpent < 3600) { // placeholder time to only record if less than 1 hour (sanity check)
     const data = await chrome.storage.local.get(STORAGE_KEYS.SITE_USAGE);
     const siteUsage = data[STORAGE_KEYS.SITE_USAGE] || {};
-    
+
     const today = new Date().toDateString();
     if (!siteUsage[today]) {
       siteUsage[today] = {};
     }
-    
+
     if (!siteUsage[today][currentTab]) {
       siteUsage[today][currentTab] = 0;
     }
-    
+
     siteUsage[today][currentTab] += timeSpent;
-    
+
     await chrome.storage.local.set({ [STORAGE_KEYS.SITE_USAGE]: siteUsage });
   }
-  
+
   currentTab = null;
   startTime = null;
 }
@@ -126,27 +126,27 @@ async function updateBlockingRules(sites) {
   // Check if brain break is active
   const brainBreakData = await chrome.storage.local.get(STORAGE_KEYS.BRAIN_BREAK);
   const brainBreak = brainBreakData[STORAGE_KEYS.BRAIN_BREAK];
-  
+
   if (brainBreak && brainBreak.active) {
     // Don't block sites during brain break
     return;
   }
-  
+
   if (!sites) {
     const data = await chrome.storage.local.get(STORAGE_KEYS.BLOCKED_SITES);
     sites = data[STORAGE_KEYS.BLOCKED_SITES] || [];
   }
-  
+
   // Clear existing rules
   const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
   const ruleIds = existingRules.map(rule => rule.id);
-  
+
   if (ruleIds.length > 0) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: ruleIds
     });
   }
-  
+
   // Add new rules for blocked sites
   const rules = sites.map((site, index) => ({
     id: index + 1,
@@ -162,7 +162,7 @@ async function updateBlockingRules(sites) {
       resourceTypes: ['main_frame']
     }
   }));
-  
+
   if (rules.length > 0) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       addRules: rules
@@ -197,7 +197,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     // Timer completed
     showNotification('⏰ Timer Complete!', 'Your focus session is done!');
     playAlarm('beep');
-    
+
     // Notify popup if open
     chrome.runtime.sendMessage({ type: 'TIMER_COMPLETE' });
   } else if (alarm.name === 'brainBreakEnd') {
@@ -210,7 +210,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // Timer alarm management
 async function startTimerAlarm(endTime, mode) {
   await chrome.alarms.create('timerComplete', { when: endTime });
-  
+
   await chrome.storage.local.set({
     [STORAGE_KEYS.TIMER_STATE]: {
       endTime: endTime,
@@ -223,11 +223,11 @@ async function startTimerAlarm(endTime, mode) {
 // Brain break management
 async function startBrainBreak(endTime) {
   await chrome.alarms.create('brainBreakEnd', { when: endTime });
-  
+
   // Clear all blocking rules
   const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
   const ruleIds = existingRules.map(rule => rule.id);
-  
+
   if (ruleIds.length > 0) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: ruleIds
@@ -237,39 +237,39 @@ async function startBrainBreak(endTime) {
 
 async function endBrainBreak() {
   await chrome.alarms.clear('brainBreakEnd');
-  
+
   await chrome.storage.local.set({
     [STORAGE_KEYS.BRAIN_BREAK]: {
       active: false,
       endTime: null
     }
   });
-  
+
   // Re-enable blocking
   await updateBlockingRules();
-  
+
   showNotification('🎯 Brain Break Complete!', 'Back to work! Blocked sites are active again.');
-  
+
   // Notify popup if open
   chrome.runtime.sendMessage({ type: 'BRAIN_BREAK_ENDED' });
 }
 
- // Clean up old usage data
+// Clean up old usage data
 async function cleanupOldData() {
   const data = await chrome.storage.local.get(STORAGE_KEYS.SITE_USAGE);
   const siteUsage = data[STORAGE_KEYS.SITE_USAGE] || {};
-  
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  
+
   const cleanedUsage = {};
-  
+
   for (const [date, usage] of Object.entries(siteUsage)) {
     const dateObj = new Date(date);
     if (dateObj >= thirtyDaysAgo) {
       cleanedUsage[date] = usage;
     }
   }
-  
+
   await chrome.storage.local.set({ [STORAGE_KEYS.SITE_USAGE]: cleanedUsage });
 }
