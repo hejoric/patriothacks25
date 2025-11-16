@@ -7,13 +7,13 @@ const STORAGE_KEYS = {
   AVATAR_SETTINGS: 'avatarSettings'
 };
 
-// Initialize when DOM is loaded
+// Initialize the extension when popup opens
 document.addEventListener('DOMContentLoaded', async () => {
   await loadTodos();
   setupEventListeners();
 });
 
-// Setup basic event listeners
+// Attach event listeners to all interactive elements
 function setupEventListeners() {
 
   document.getElementById('addTodo')?.addEventListener('click', addTodo);
@@ -33,17 +33,17 @@ function setupEventListeners() {
     });
   });
 
-  // Settings
+
   document.getElementById('saveSettings')?.addEventListener('click', saveSettings);
 
-  // Website blocker
+
   document.getElementById('addBlockedSite')?.addEventListener('click', addBlockedSite);
   document.getElementById('blockedSiteInput')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addBlockedSite();
   });
 }
 
-// Todo list functionality
+// Load and display todos from storage
 async function loadTodos() {
   const data = await chrome.storage.local.get(STORAGE_KEYS.TODOS);
   const todos = data[STORAGE_KEYS.TODOS] || [];
@@ -59,6 +59,7 @@ async function loadTodos() {
   });
 }
 
+// Create a DOM element for a single todo item with event handlers
 function createTodoElement(todo, index) {
   const div = document.createElement('div');
   div.className = `todo-item ${todo.completed ? 'completed' : ''}`;
@@ -80,6 +81,7 @@ function createTodoElement(todo, index) {
   return div;
 }
 
+// Add a new todo item to storage and refresh the list
 async function addTodo() {
   const input = document.getElementById('todoInput');
   if (!input) return;
@@ -103,6 +105,7 @@ async function addTodo() {
   await loadTodos();
 }
 
+// Toggle the completed state of a todo item
 async function toggleTodo(index) {
   const data = await chrome.storage.local.get(STORAGE_KEYS.TODOS);
   const todos = data[STORAGE_KEYS.TODOS] || [];
@@ -114,6 +117,7 @@ async function toggleTodo(index) {
   }
 }
 
+// Remove a todo item from storage
 async function deleteTodo(index) {
   const data = await chrome.storage.local.get(STORAGE_KEYS.TODOS);
   const todos = data[STORAGE_KEYS.TODOS] || [];
@@ -123,11 +127,12 @@ async function deleteTodo(index) {
   await loadTodos();
 }
 
-// Timer functionality
+// Timer state variables
 let timerInterval = null;
-let timeRemaining = 25 * 60; // 25 minutes in seconds
+let timeRemaining = 25 * 60;
 let isTimerRunning = false;
 
+// Start the countdown timer with 1-second intervals
 function startTimer() {
   if (isTimerRunning) return;
 
@@ -139,7 +144,6 @@ function startTimer() {
       updateTimerDisplay();
       saveTimerState();
     } else {
-      // Timer completed
       pauseTimer();
       showNotification('Timer Complete!', 'Your session is finished.');
     }
@@ -149,6 +153,7 @@ function startTimer() {
   saveTimerState();
 }
 
+// Pause the timer and clear the interval
 function pauseTimer() {
   isTimerRunning = false;
 
@@ -160,13 +165,15 @@ function pauseTimer() {
   saveTimerState();
 }
 
+// Reset timer to default 25 minutes
 function resetTimer() {
   pauseTimer();
-  timeRemaining = 25 * 60; // Reset to 25 minutes
+  timeRemaining = 25 * 60;
   updateTimerDisplay();
   saveTimerState();
 }
 
+// Update the timer display in MM:SS format
 function updateTimerDisplay() {
   const minutes = Math.floor(timeRemaining / 60);
   const seconds = timeRemaining % 60;
@@ -176,6 +183,7 @@ function updateTimerDisplay() {
   }
 }
 
+// Persist timer state to chrome storage
 async function saveTimerState() {
   await chrome.storage.local.set({
     [STORAGE_KEYS.TIMER_STATE]: {
@@ -228,6 +236,7 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// Display a browser notification or fallback to alert
 function showNotification(title, message) {
   // Check if notifications are supported
   if ('Notification' in window) {
