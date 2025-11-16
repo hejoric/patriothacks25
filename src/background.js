@@ -170,4 +170,87 @@ async function updateBlockingRules(sites) {
   }
 }
 
+// Show notification
+function showNotification(title, message) {
+  chrome.notifications.create({
+    type: 'basic',
+    iconUrl: 'icons/icon128.png',
+    title: title,
+    message: message,
+    priority: 2
+  });
+}
+
+// Play alarm sound
+function playAlarm(voicePack) {
+  // In a real implementation, this would play different sounds based on voicePack
+  // For now, we'll just show a notification
+  showNotification('⏰ Timer Complete!', 'Time to take a break or start a new session!');
+}
+
+// Handle alarms
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'dailyReset') {
+    // Clean up old usage data (keep only last 30 days)
+    cleanupOldData();
+  } else if (alarm.name === 'timerComplete') {
+    // Timer completed
+    showNotification('⏰ Timer Complete!', 'Your focus session is done!');
+    playAlarm('beep');
+    
+    // Notify popup if open
+    chrome.runtime.sendMessage({ type: 'TIMER_COMPLETE' });
+  } else if (alarm.name === 'brainBreakEnd') {
+    // Brain break ended
+    endBrainBreak();
+  }
+});
+
+
+// Timer alarm management
+async function startTimerAlarm(endTime, mode) {
+  await chrome.alarms.create('timerComplete', { when: endTime });
+  
+  await chrome.storage.local.set({
+    [STORAGE_KEYS.TIMER_STATE]: {
+      endTime: endTime,
+      mode: mode,
+      isRunning: true
+    }
+  });
+}
+
+// Brain break management
+async function startBrainBreak(endTime) {
+  await chrome.alarms.create('brainBreakEnd', { when: endTime });
+  
+  // Clear all blocking rules
+  const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+  const ruleIds = existingRules.map(rule => rule.id);
+  
+  if (ruleIds.length > 0) {
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: ruleIds
+    });
+  }
+}
+
+async function endBrainBreak() {
+  await chrome.alarms.clear('brainBreakEnd');
+  
+  await chrome.storage.local.set({
+    [STORAGE_KEYS.BRAIN_BREAK]: {
+      active: false,
+      endTime: null
+    }
+  });
+  
+  // Re-enable blocking
+  await updateBlockingRules();
+  
+  showNotification('🎯 Brain Break Complete!', 'Back to work! Blocked sites are active again.');
+  
+  // Notify popup if open
+  chrome.runtime.sendMessage({ type: 'BRAIN_BREAK_ENDED' });
+}
 
