@@ -121,4 +121,53 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// Update blocking rules
+async function updateBlockingRules(sites) {
+  // Check if brain break is active
+  const brainBreakData = await chrome.storage.local.get(STORAGE_KEYS.BRAIN_BREAK);
+  const brainBreak = brainBreakData[STORAGE_KEYS.BRAIN_BREAK];
+  
+  if (brainBreak && brainBreak.active) {
+    // Don't block sites during brain break
+    return;
+  }
+  
+  if (!sites) {
+    const data = await chrome.storage.local.get(STORAGE_KEYS.BLOCKED_SITES);
+    sites = data[STORAGE_KEYS.BLOCKED_SITES] || [];
+  }
+  
+  // Clear existing rules
+  const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+  const ruleIds = existingRules.map(rule => rule.id);
+  
+  if (ruleIds.length > 0) {
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: ruleIds
+    });
+  }
+  
+  // Add new rules for blocked sites
+  const rules = sites.map((site, index) => ({
+    id: index + 1,
+    priority: 1,
+    action: {
+      type: 'redirect',
+      redirect: {
+        url: chrome.runtime.getURL('blocked.html')
+      }
+    },
+    condition: {
+      urlFilter: `*://*.${site}/*`,
+      resourceTypes: ['main_frame']
+    }
+  }));
+  
+  if (rules.length > 0) {
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      addRules: rules
+    });
+  }
+}
+
 
