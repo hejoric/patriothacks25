@@ -1,49 +1,42 @@
 {
-  "name": "Fresh Chrome Extension boilerplate",
-  "description": "Fully functional, useful bare minimum Google Chrome extension boilerplate [Manifest V3].",
-  "homepage_url": "https://github.com/llagerlof/fresh-chrome-extension",
-  "version": "3.1.0",
   "manifest_version": 3,
+  "name": "Productivity Pal",
+  "version": "1.0.0",
+  "description": "A comprehensive productivity browser extension with todo lists, timers, website blocking, and mood tracking",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications",
+    "tabs",
+    "webNavigation",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
-    "default_title": "Fresh Chrome Extension boilerplate 3.1.0",
-    "default_popup": "src/popup/popup.html",
+    "default_popup": "popup.html",
     "default_icon": {
-      "16": "assets/icons/icon16.png",
-      "32": "assets/icons/icon32.png",
-      "64": "assets/icons/icon64.png",
-      "128": "assets/icons/icon128.png"
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     }
   },
   "icons": {
-    "16": "assets/icons/icon16.png",
-    "32": "assets/icons/icon32.png",
-    "64": "assets/icons/icon64.png",
-    "128": "assets/icons/icon128.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
-  "content_scripts": [
-    {
-      "run_at" : "document_start",
-      "js": ["src/content/before.js"],
-      "matches": [
-        "https://*/*",
-        "http://*/*"
-      ]
-    },
-    {
-      "run_at" : "document_idle",
-      "js": ["src/content/after.js"],
-      "matches": [
-        "https://*/*",
-        "http://*/*"
-      ]
-    }
-  ],
-  "permissions": [
-    "tabs",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://*/*",
-    "http://*/*"
-  ]
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "blocked_sites",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
 }
