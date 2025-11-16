@@ -254,3 +254,22 @@ async function endBrainBreak() {
   chrome.runtime.sendMessage({ type: 'BRAIN_BREAK_ENDED' });
 }
 
+ // Clean up old usage data
+async function cleanupOldData() {
+  const data = await chrome.storage.local.get(STORAGE_KEYS.SITE_USAGE);
+  const siteUsage = data[STORAGE_KEYS.SITE_USAGE] || {};
+  
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const cleanedUsage = {};
+  
+  for (const [date, usage] of Object.entries(siteUsage)) {
+    const dateObj = new Date(date);
+    if (dateObj >= thirtyDaysAgo) {
+      cleanedUsage[date] = usage;
+    }
+  }
+  
+  await chrome.storage.local.set({ [STORAGE_KEYS.SITE_USAGE]: cleanedUsage });
+}
