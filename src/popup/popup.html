@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <style>
-    body { width: 200px; padding: 10px; }
-    button { width: 100%; padding: 10px; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productivity Pal</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <button id="btnShowOrangeDiv">Click this button to add an orange div to the page</button>
-  <p>(I am in "popup.html")</p>  
-  <script src="popup.js"></script>
-</body>
-</html>
+  <div class="container">
+    <!-- Avatar and Mood Meter -->
+    <div class="avatar-section">
+      <div class="avatar-container">
+        <div id="avatar" class="avatar"></div>
+        <div id="moodMeter" class="mood-meter">😊</div>
+      </div>
+      <div class="streak-counter">
+        🔥 <span id="streakCount">0</span> day streak
+      </div>
+    </div>
+    
