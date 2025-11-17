@@ -32,19 +32,34 @@ async function initializeExtension() {
   await loadDailyTasks();
   await loadBlockedSites();
   await loadUsageStats();
-  await loadAvatarSettings();
   await loadSectionStates();
-  updateMood();
 }
 
 // Setup all event listeners
 function setupEventListeners() {
-  document.querySelectorAll('.tab-button').forEach(button => {
+  // Handle both old tab-button class and new nav-btn class
+  document.querySelectorAll('.tab-button, .nav-btn').forEach(button => {
     button.addEventListener('click', (e) => {
       const tabName = e.currentTarget.dataset.tab;
       switchTab(tabName);
     });
   });
+
+  // Duck timer control
+  const duckControl = document.getElementById('duckTimerControl');
+  if (duckControl) {
+    duckControl.addEventListener('click', handleDuckClick);
+  }
+
+  // Block site button
+  const blockSiteBtn = document.getElementById('blockSiteBtn');
+  if (blockSiteBtn) {
+    blockSiteBtn.addEventListener('click', handleBlockSiteClick);
+  }
+
+  // Update task counters in status bar
+  updateStatusBar();
+  updateDuckImage();
 
   document.getElementById('addTodo').addEventListener('click', addTodo);
   document.getElementById('todoInput').addEventListener('keypress', (e) => {
@@ -97,18 +112,6 @@ function setupEventListeners() {
     if (e.key === 'Enter') addBlockedSite();
   });
 
-  document.getElementById('avatarColor').addEventListener('change', (e) => {
-    updateAvatarSetting('color', e.target.value);
-  });
-
-  document.getElementById('avatarStyle').addEventListener('change', (e) => {
-    updateAvatarSetting('style', e.target.value);
-  });
-
-  document.getElementById('avatarEmoji').addEventListener('change', (e) => {
-    updateAvatarSetting('emoji', e.target.value);
-  });
-
   document.getElementById('enableNotifications').addEventListener('change', (e) => {
     saveNotificationSettings(e.target.checked);
   });
@@ -120,15 +123,14 @@ function setupEventListeners() {
 
 // Tab switching
 function switchTab(tabName) {
-  // Remove active from all buttons and add Bootstrap's active class
-  document.querySelectorAll('.tab-button').forEach(btn => {
+  // Remove active from all buttons (both old and new style)
+  document.querySelectorAll('.tab-button, .nav-btn').forEach(btn => {
     btn.classList.remove('active');
   });
   
   // Hide all tab content
   document.querySelectorAll('.tab-content').forEach(content => {
     content.classList.remove('active');
-    content.style.display = 'none';
   });
 
   // Show selected tab
@@ -138,7 +140,6 @@ function switchTab(tabName) {
   if (selectedButton) selectedButton.classList.add('active');
   if (selectedContent) {
     selectedContent.classList.add('active');
-    selectedContent.style.display = 'block';
   }
 }
 
@@ -187,10 +188,13 @@ async function updateStreak() {
   }
 
   const streakDisplay = streak > 0 ? `${streak}` : '0';
-  document.getElementById('streakCount').textContent = streakDisplay;
+  const streakCountElem = document.getElementById('streakCount');
+  if (streakCountElem) {
+    streakCountElem.textContent = streakDisplay;
+  }
 
   const streakCounter = document.querySelector('.streak-counter');
-  if (streak >= 7) {
+  if (streakCounter && streak >= 7) {
     streakCounter.style.animation = 'pulse 2s infinite';
   }
 }
@@ -332,7 +336,6 @@ async function addTodo() {
 
   await loadTodos();
   await loadDailyTasks();
-  updateMood();
   updateStreak();
 }
 
@@ -350,7 +353,6 @@ async function toggleTodo(index) {
     await chrome.storage.local.set({ [STORAGE_KEYS.TODOS]: todos });
     await loadTodos();
     await loadDailyTasks();
-    updateMood();
     updateStreak();
   }
 }
@@ -370,7 +372,6 @@ async function deleteTodo(index) {
   await chrome.storage.local.set({ [STORAGE_KEYS.TODOS]: todos });
   await loadTodos();
   await loadDailyTasks();
-  updateMood();
 }
 
 function updateProgressBar(todos) {
@@ -387,6 +388,9 @@ function updateProgressBar(todos) {
   const percentage = Math.round((completedTodos.length / total) * 100);
   document.getElementById('progressBar').style.width = percentage + '%';
   document.getElementById('progressText').textContent = percentage + '%';
+  
+  // Update status bar
+  updateStatusBar();
 }
 
 function updateTodoStats(todos) {
@@ -455,6 +459,7 @@ async function setTimerMode(mode, minutes) {
   timeRemaining = minutes * 60;
   
   updateTimerDisplay();
+  updateDuckImage();
 
   // Update button states
   document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -480,6 +485,7 @@ async function startTimer() {
   });
 
   await saveTimerState();
+  updateDuckImage();
   runTimerUI();
 }
 
@@ -509,6 +515,7 @@ async function pauseTimer() {
 
   chrome.runtime.sendMessage({ type: 'PAUSE_TIMER' });
   await saveTimerState();
+  updateDuckImage();
 }
 
 async function resetTimer() {
@@ -516,13 +523,25 @@ async function resetTimer() {
   timeRemaining = TIMER_MODES[currentMode] || 25 * 60;
   updateTimerDisplay();
   await saveTimerState();
+  updateDuckImage();
 }
 
 function updateTimerDisplay() {
   const minutes = Math.floor(timeRemaining / 60);
   const seconds = timeRemaining % 60;
-  document.getElementById('timerDisplay').textContent =
-    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  
+  // Update main timer display
+  const timerDisplay = document.getElementById('timerDisplay');
+  if (timerDisplay) {
+    timerDisplay.textContent = timeStr;
+  }
+  
+  // Also update status bar timer
+  const timerDisplayMain = document.querySelector('.timer-display-main');
+  if (timerDisplayMain) {
+    timerDisplayMain.textContent = timeStr;
+  }
 }
 
 async function timerComplete() {
@@ -535,6 +554,7 @@ async function timerComplete() {
   chrome.runtime.sendMessage({ type: 'PLAY_ALARM', voicePack });
 
   resetTimer();
+  updateDuckImage();
 }
 
 async function saveTimerState() {
@@ -924,6 +944,91 @@ async function clearAllData() {
     await initializeExtension();
   }
 }
+
+// Update status bar with task count and timer
+function updateStatusBar() {
+  const tasksCompletedElem = document.getElementById('tasksCompletedToday');
+  const tasksTotalElem = document.getElementById('tasksTotalToday');
+  
+  if (tasksCompletedElem && tasksTotalElem) {
+    chrome.storage.local.get([STORAGE_KEYS.TODOS, STORAGE_KEYS.DAILY_TASKS], (data) => {
+      const todos = data[STORAGE_KEYS.TODOS] || [];
+      const dailyTasks = data[STORAGE_KEYS.DAILY_TASKS] || [];
+      const allTasks = [...todos, ...dailyTasks];
+      
+      const completed = allTasks.filter(task => task.completed).length;
+      const total = allTasks.length;
+      
+      tasksCompletedElem.textContent = completed;
+      tasksTotalElem.textContent = total;
+    });
+  }
+}
+
+// Handle block site button click
+async function handleBlockSiteClick() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  
+  if (!tab || !tab.url) {
+    alert('Cannot access current tab URL');
+    return;
+  }
+  
+  try {
+    const url = new URL(tab.url);
+    const hostname = url.hostname.replace('www.', '');
+    
+    if (hostname === 'chrome.google.com' || hostname === 'chrome' || url.protocol === 'chrome:' || url.protocol === 'chrome-extension:') {
+      alert('Cannot block Chrome system pages');
+      return;
+    }
+    
+    const data = await chrome.storage.local.get(STORAGE_KEYS.BLOCKED_SITES);
+    const blockedSites = data[STORAGE_KEYS.BLOCKED_SITES] || [];
+    
+    if (blockedSites.includes(hostname)) {
+      alert(`${hostname} is already blocked!`);
+      return;
+    }
+    
+    blockedSites.push(hostname);
+    await chrome.storage.local.set({ [STORAGE_KEYS.BLOCKED_SITES]: blockedSites });
+    
+    // Update blocking rules
+    chrome.runtime.sendMessage({ type: 'UPDATE_BLOCKED_SITES', sites: blockedSites });
+    
+    alert(`${hostname} has been blocked!`);
+    await loadBlockedSites();
+  } catch (error) {
+    alert('Error blocking site: ' + error.message);
+  }
+}
+
+// Duck timer control functions
+function handleDuckClick() {
+  if (isTimerRunning) {
+    pauseTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function updateDuckImage() {
+  const duckImage = document.getElementById('duckImage');
+  const duckControl = document.getElementById('duckTimerControl');
+  if (!duckImage || !duckControl) return;
+
+  if (isTimerRunning) {
+    duckImage.src = '../../assets/icons/duck_going.png';
+    duckImage.alt = 'Timer Running';
+    duckControl.classList.add('timer-running');
+  } else {
+    duckImage.src = '../../assets/icons/duck_ready.png';
+    duckImage.alt = 'Timer Ready';
+    duckControl.classList.remove('timer-running');
+  }
+}
+
 
 // Utility functions
 function updateUI() {

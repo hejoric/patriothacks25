@@ -10,36 +10,32 @@
 </head>
 
 <body>
-  <div class="container p-2" style="height: 100%; display: flex; flex-direction: column;">
-    <!-- Avatar and Mood Meter -->
-    <div class="text-center mb-2 bg-white rounded-3 p-2 shadow-sm">
-      <div class="position-relative d-inline-block">
-        <div id="avatar" class="avatar"></div>
-        <div id="moodMeter" class="mood-meter">😊</div>
+  <div class="container p-0" style="height: 100%; display: flex; flex-direction: column;">
+    <!-- Top Navigation Bar -->
+    <div class="top-nav">
+      <button class="nav-btn active" data-tab="todos" title="Tasks">✓ TASKS</button>
+      <button class="nav-btn" data-tab="timer" title="Timer">⏱ TIMER</button>
+      <button class="nav-btn" data-tab="blocker" title="Blocker">🚫 BLOCKER</button>
+      <button class="nav-btn" data-tab="settings" title="Settings">⚙️ SETTINGS</button>
+    </div>
+
+    <!-- Status Bar with Avatar and Timer -->
+    <div class="status-bar">
+      <div class="status-left">
+        <button id="duckTimerControl" class="duck-control" title="Start/Pause Timer">
+          <img id="duckImage" src="../../assets/icons/duck_ready.png" alt="Timer Control" />
+        </button>
       </div>
-      <div class="fs-6 fw-bold text-primary mt-1">
-        🔥 <span id="streakCount">0</span> day streak
+      <div class="status-center">
+        <div class="task-counter">
+          <span id="tasksCompletedToday">0</span>/<span id="tasksTotalToday">4</span>
+        </div>
+        <div id="timerDisplay" class="timer-display-main">25:00</div>
       </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <ul class="nav nav-pills mb-2 bg-white rounded-3 p-1 shadow-sm" role="tablist">
-      <li class="nav-item flex-fill">
-        <button class="nav-link active w-100 tab-button py-1 px-2 small" data-tab="todos" title="Tasks">✓</button>
-      </li>
-      <li class="nav-item flex-fill">
-        <button class="nav-link w-100 tab-button py-1 px-2 small" data-tab="timer" title="Timer">⏱</button>
-      </li>
-      <li class="nav-item flex-fill">
-        <button class="nav-link w-100 tab-button py-1 px-2 small" data-tab="blocker" title="Blocker">🚫</button>
-      </li>
-      <li class="nav-item flex-fill">
-        <button class="nav-link w-100 tab-button py-1 px-2 small" data-tab="settings" title="Settings">⚙</button>
-      </li>
-    </ul>
-
     <!-- Todo List Tab -->
-    <div id="todos" class="tab-content active bg-white rounded-3 p-2 shadow-sm" style="display: block; flex: 1;">
+    <div id="todos" class="tab-content active p-3" style="flex: 1; overflow-y: auto;">
       <div class="mb-2">
         <div class="input-group mb-2">
           <input type="text" id="todoInput" class="form-control form-control-sm" placeholder="Add a new task.." />
@@ -109,19 +105,19 @@
     </div>
 
     <!-- Timer Tab -->
-    <div id="timer" class="tab-content bg-white rounded-3 p-3 shadow-sm" style="min-height: 300px; display: none;">
+    <div id="timer" class="tab-content p-3" style="min-height: 300px; display: none;">
       <div class="btn-group w-100 mb-3" role="group">
         <button class="btn btn-outline-primary mode-btn active" data-mode="pomodoro" data-minutes="25">Pomodoro</button>
         <button class="btn btn-outline-primary mode-btn" data-mode="shortBreak" data-minutes="5">Short Break</button>
         <button class="btn btn-outline-primary mode-btn" data-mode="longBreak" data-minutes="15">Long Break</button>
       </div>
 
-      <div id="timerDisplay" class="timer-display">25:00</div>
-
-      <div class="d-flex gap-2 justify-content-center mb-4">
-        <button id="startTimer" class="btn btn-primary px-4">Start</button>
-        <button id="pauseTimer" class="btn btn-secondary">Pause</button>
-        <button id="resetTimer" class="btn btn-secondary">Reset</button>
+      <div class="timer-controls mb-4">
+        <div class="d-flex gap-2 justify-content-center mb-3">
+          <button id="startTimer" class="btn btn-primary px-4">Start</button>
+          <button id="pauseTimer" class="btn btn-secondary">Pause</button>
+          <button id="resetTimer" class="btn btn-secondary">Reset</button>
+        </div>
       </div>
 
       <!-- Brain Break Section -->
@@ -152,7 +148,7 @@
     </div>
 
     <!-- Website Blocker Tab -->
-    <div id="blocker" class="tab-content bg-white rounded-3 p-3 shadow-sm" style="display: none;">
+    <div id="blocker" class="tab-content p-3" style="display: none;">
       <div class="d-flex gap-2 mb-3">
         <input type="text" id="blockedSiteInput" class="form-control" placeholder="Enter website to block..." />
         <button id="addBlockedSite" class="btn btn-danger">Block</button>
@@ -165,34 +161,7 @@
     </div>
 
     <!-- Settings Tab -->
-    <div id="settings" class="tab-content bg-white rounded-3 p-3 shadow-sm" style="min-height: 300px; display: none;">
-      <h6 class="text-primary mb-3">Customize Avatar</h6>
-
-      <div class="mb-3">
-        <label class="form-label">Avatar Color:</label>
-        <input type="color" id="avatarColor" class="form-control form-control-color" value="#4CAF50" />
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Avatar Style:</label>
-        <select id="avatarStyle" class="form-select">
-          <option value="circle">Circle</option>
-          <option value="square">Square</option>
-          <option value="rounded">Rounded</option>
-        </select>
-      </div>
-
-      <div class="mb-4">
-        <label class="form-label">Avatar Emoji:</label>
-        <select id="avatarEmoji" class="form-select">
-          <option value="😊">😊 Happy</option>
-          <option value="🤓">🤓 Nerdy</option>
-          <option value="🚀">🚀 Rocket</option>
-          <option value="🌟">🌟 Star</option>
-          <option value="💪">💪 Strong</option>
-        </select>
-      </div>
-
+    <div id="settings" class="tab-content p-3" style="min-height: 300px; display: none;">
       <h6 class="text-primary mb-3">Notifications</h6>
       <div class="form-check mb-4">
         <input type="checkbox" id="enableNotifications" class="form-check-input" checked />

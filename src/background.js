@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
 //Tracks active tab and the time spent
 let currentTab = null;
 let startTime = null;
+let trackingInterval = null;
 
 //Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
@@ -19,6 +20,9 @@ chrome.runtime.onInstalled.addListener(() => {
   updateBlockingRules();
   //set up alarms for daily reset
   chrome.alarms.create('dailyReset', { periodInMinutes: 1440 }); // 24 hours
+  
+  // Start periodic tracking
+  startPeriodicTracking();
 });
 
 // Listen for tab activation
@@ -71,6 +75,29 @@ function startTracking(tab) {
   }
 }
 
+// Periodic tracking to update time every 10 seconds
+function startPeriodicTracking() {
+  if (trackingInterval) {
+    clearInterval(trackingInterval);
+  }
+  
+  trackingInterval = setInterval(async () => {
+    if (currentTab && startTime) {
+      const now = Date.now();
+      const timeSpent = Math.floor((now - startTime) / 1000);
+      
+      if (timeSpent >= 10) { // Record every 10 seconds
+        await recordTimeSpent();
+        // Restart tracking for the same tab
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tabs[0]) {
+          startTracking(tabs[0]);
+        }
+      }
+    }
+  }, 10000); // Check every 10 seconds
+}
+
 
 
 // Record time spent on current tab
@@ -80,7 +107,7 @@ async function recordTimeSpent() {
   const endTime = Date.now();
   const timeSpent = Math.floor((endTime - startTime) / 1000); // in seconds
 
-  if (timeSpent > 0 && timeSpent < 3600) { // placeholder time to only record if less than 1 hour (sanity check)
+  if (timeSpent > 0 && timeSpent < 7200) { // Only record if less than 2 hours (sanity check)
     const data = await chrome.storage.local.get(STORAGE_KEYS.SITE_USAGE);
     const siteUsage = data[STORAGE_KEYS.SITE_USAGE] || {};
 
@@ -96,6 +123,8 @@ async function recordTimeSpent() {
     siteUsage[today][currentTab] += timeSpent;
 
     await chrome.storage.local.set({ [STORAGE_KEYS.SITE_USAGE]: siteUsage });
+    
+    console.log(`Recorded ${timeSpent}s for ${currentTab}`);
   }
 
   currentTab = null;
@@ -176,7 +205,7 @@ async function updateBlockingRules(sites) {
 function showNotification(title, message) {
   chrome.notifications.create({
     type: 'basic',
-    iconUrl: 'assets/icons/icon128.png',
+    iconUrl: chrome.runtime.getURL('assets/icons/icon128.png'),
     title: title,
     message: message,
     priority: 2
