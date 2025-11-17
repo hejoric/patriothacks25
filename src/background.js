@@ -188,9 +188,11 @@ async function updateBlockingRules(sites) {
   // Add new rules for blocked sites
   const rules = [];
   sites.forEach((site, index) => {
-    // Rule to match www version
+    const baseId = index * 4;
+    
+    // Rule 1: Match www version with path
     rules.push({
-      id: index * 2 + 1,
+      id: baseId + 1,
       priority: 1,
       action: {
         type: 'redirect',
@@ -204,9 +206,25 @@ async function updateBlockingRules(sites) {
       }
     });
     
-    // Rule to match non-www version  
+    // Rule 2: Match www version without path
     rules.push({
-      id: index * 2 + 2,
+      id: baseId + 2,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          extensionPath: '/assets/blocked.html'
+        }
+      },
+      condition: {
+        urlFilter: `*://www.${site}`,
+        resourceTypes: ['main_frame']
+      }
+    });
+    
+    // Rule 3: Match non-www version with path
+    rules.push({
+      id: baseId + 3,
       priority: 1,
       action: {
         type: 'redirect',
@@ -219,6 +237,22 @@ async function updateBlockingRules(sites) {
         resourceTypes: ['main_frame']
       }
     });
+    
+    // Rule 4: Match non-www version without path
+    rules.push({
+      id: baseId + 4,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          extensionPath: '/assets/blocked.html'
+        }
+      },
+      condition: {
+        urlFilter: `*://${site}`,
+        resourceTypes: ['main_frame']
+      }
+    });
   });
 
   if (rules.length > 0) {
@@ -228,11 +262,15 @@ async function updateBlockingRules(sites) {
       });
       console.log('✅ Blocking rules updated successfully:', sites.length, 'sites,', rules.length, 'rules created');
       console.log('📋 Sites being blocked:', sites);
-      console.log('🔧 Sample rules:', JSON.stringify(rules.slice(0, 2), null, 2));
+      console.log('🔧 Sample rules for', sites[0] + ':', JSON.stringify(rules.slice(0, 4), null, 2));
 
       // Verify rules were actually added
       const verifyRules = await chrome.declarativeNetRequest.getDynamicRules();
       console.log('✔️ Verified dynamic rules count:', verifyRules.length);
+      
+      if (verifyRules.length === 0) {
+        console.error('⚠️ WARNING: No rules are active! Check manifest permissions.');
+      }
     } catch (error) {
       console.error('❌ Error updating blocking rules:', error);
       console.error('Failed rules:', JSON.stringify(rules, null, 2));
