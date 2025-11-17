@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Productivity Pal",
-  "version": "1.0.0",
+  "name": "Locked In",
+  "version": "1.0.1",
   "description": "A comprehensive productivity browser extension with todo lists, timers, website blocking, and mood tracking",
   "permissions": [
     "storage",
@@ -9,7 +9,8 @@
     "notifications",
     "tabs",
     "webNavigation",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -30,6 +31,12 @@
     "48": "assets/icons/icon48.png",
     "128": "assets/icons/icon128.png"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/icons/*.png", "assets/blocked.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "declarative_net_request": {
     "rule_resources": [
       {

@@ -15,12 +15,12 @@ let trackingInterval = null;
 
 //Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Lock In Extension installed');
+  console.log('Locked In Extension installed');
   //set up the intial rules
   updateBlockingRules();
   //set up alarms for daily reset
   chrome.alarms.create('dailyReset', { periodInMinutes: 1440 }); // 24 hours
-  
+
   // Start periodic tracking
   startPeriodicTracking();
 });
@@ -80,12 +80,12 @@ function startPeriodicTracking() {
   if (trackingInterval) {
     clearInterval(trackingInterval);
   }
-  
+
   trackingInterval = setInterval(async () => {
     if (currentTab && startTime) {
       const now = Date.now();
       const timeSpent = Math.floor((now - startTime) / 1000);
-      
+
       if (timeSpent >= 10) { // Record every 10 seconds
         await recordTimeSpent();
         // Restart tracking for the same tab
@@ -123,7 +123,7 @@ async function recordTimeSpent() {
     siteUsage[today][currentTab] += timeSpent;
 
     await chrome.storage.local.set({ [STORAGE_KEYS.SITE_USAGE]: siteUsage });
-    
+
     console.log(`Recorded ${timeSpent}s for ${currentTab}`);
   }
 
@@ -133,7 +133,10 @@ async function recordTimeSpent() {
 
 //Handle messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('📨 Message received:', message.type);
+
   if (message.type === 'UPDATE_BLOCKED_SITES') {
+    console.log('🔄 Updating blocked sites:', message.sites);
     updateBlockingRules(message.sites);
   } else if (message.type === 'SHOW_NOTIFICATION') {
     showNotification(message.title, message.message);
@@ -157,9 +160,11 @@ async function updateBlockingRules(sites) {
   // Check if brain break is active
   const brainBreakData = await chrome.storage.local.get(STORAGE_KEYS.BRAIN_BREAK);
   const brainBreak = brainBreakData[STORAGE_KEYS.BRAIN_BREAK];
+  console.log('🧠 Brain break state:', brainBreak);
 
   if (brainBreak && brainBreak.active) {
     // Don't block sites during brain break
+    console.log('⚠️ Brain break active - skipping block rules update');
     return;
   }
 
@@ -167,6 +172,8 @@ async function updateBlockingRules(sites) {
     const data = await chrome.storage.local.get(STORAGE_KEYS.BLOCKED_SITES);
     sites = data[STORAGE_KEYS.BLOCKED_SITES] || [];
   }
+
+  console.log('Updating blocking rules for sites:', sites);
 
   // Clear existing rules
   const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
@@ -179,29 +186,61 @@ async function updateBlockingRules(sites) {
   }
 
   // Add new rules for blocked sites
-  const rules = sites.map((site, index) => ({
-    id: index + 1,
-    priority: 1,
-    action: {
-      type: 'redirect',
-      redirect: {
-        url: chrome.runtime.getURL('assets/blocked.html')
+  const rules = [];
+  sites.forEach((site, index) => {
+    // Rule to match www version
+    rules.push({
+      id: index * 2 + 1,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          extensionPath: '/assets/blocked.html'
+        }
+      },
+      condition: {
+        urlFilter: `*://www.${site}/*`,
+        resourceTypes: ['main_frame']
       }
-    },
-    condition: {
-      urlFilter: `*://*.${site}/*`,
-      resourceTypes: ['main_frame']
-    }
-  }));
+    });
+    
+    // Rule to match non-www version  
+    rules.push({
+      id: index * 2 + 2,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          extensionPath: '/assets/blocked.html'
+        }
+      },
+      condition: {
+        urlFilter: `*://${site}/*`,
+        resourceTypes: ['main_frame']
+      }
+    });
+  });
 
   if (rules.length > 0) {
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: rules
-    });
-  }
-}
+    try {
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        addRules: rules
+      });
+      console.log('✅ Blocking rules updated successfully:', sites.length, 'sites,', rules.length, 'rules created');
+      console.log('📋 Sites being blocked:', sites);
+      console.log('🔧 Sample rules:', JSON.stringify(rules.slice(0, 2), null, 2));
 
-// Show notification
+      // Verify rules were actually added
+      const verifyRules = await chrome.declarativeNetRequest.getDynamicRules();
+      console.log('✔️ Verified dynamic rules count:', verifyRules.length);
+    } catch (error) {
+      console.error('❌ Error updating blocking rules:', error);
+      console.error('Failed rules:', JSON.stringify(rules, null, 2));
+    }
+  } else {
+    console.log('⚠️ No sites to block - sites array is empty');
+  }
+}// Show notification
 function showNotification(title, message) {
   chrome.notifications.create({
     type: 'basic',
